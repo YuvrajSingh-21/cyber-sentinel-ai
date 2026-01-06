@@ -75,12 +75,19 @@ export const Sidebar = ({ currentPage, onPageChange, anomalyCount }: SidebarProp
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* Logo */}
+        {/* Logo - Click to toggle sidebar */}
         <div className="flex items-center gap-3 p-4 border-b border-sidebar-border">
-          <div className="relative">
-            <Shield className="w-10 h-10 text-primary" />
+          <button
+            onClick={() => {
+              setIsCollapsed(!isCollapsed);
+              setIsMobileOpen(false);
+            }}
+            className="relative group cursor-pointer hover:scale-105 transition-transform duration-200"
+            aria-label="Toggle sidebar"
+          >
+            <Shield className="w-10 h-10 text-primary group-hover:text-primary/80 transition-colors" />
             <Activity className="w-4 h-4 text-primary absolute -bottom-1 -right-1 animate-pulse" />
-          </div>
+          </button>
           {!isCollapsed && (
             <div className="overflow-hidden">
               <h1 className="font-bold text-lg text-sidebar-foreground tracking-tight">
@@ -132,20 +139,6 @@ export const Sidebar = ({ currentPage, onPageChange, anomalyCount }: SidebarProp
           })}
         </nav>
 
-        {/* Collapse Toggle (Desktop) */}
-        <div className="hidden lg:block p-3 border-t border-sidebar-border">
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="sidebar-item w-full justify-center"
-          >
-            <div className={cn(
-              "transition-transform duration-300",
-              isCollapsed ? "rotate-180" : ""
-            )}>
-              <Menu className="w-5 h-5" />
-            </div>
-          </button>
-        </div>
 
         {/* Status Indicator */}
         <div className={cn(
