@@ -1,11 +1,79 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useCallback } from 'react';
+import { PageType } from '@/types/cyber';
+import { useCyberData } from '@/hooks/useCyberData';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { Header } from '@/components/layout/Header';
+import { Dashboard } from './Dashboard';
+import { Logs } from './Logs';
+import { Anomalies } from './Anomalies';
+import { Timeline } from './Timeline';
+import { Reports } from './Reports';
+import { Settings } from './Settings';
 
 const Index = () => {
+  const [currentPage, setCurrentPage] = useState<PageType>('dashboard');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const {
+    logs,
+    anomalies,
+    timeline,
+    metrics,
+    isLive,
+    updateAnomalyStatus,
+    clearLogs,
+    toggleLive,
+  } = useCyberData();
+
+  const activeAnomalyCount = anomalies.filter(a => a.status === 'active').length;
+
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+    // If on dashboard, switch to logs when searching
+    if (query && currentPage === 'dashboard') {
+      setCurrentPage('logs');
+    }
+  }, [currentPage]);
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'dashboard':
+        return <Dashboard logs={logs} metrics={metrics} anomalies={anomalies} />;
+      case 'logs':
+        return <Logs logs={logs} onClearLogs={clearLogs} />;
+      case 'anomalies':
+        return <Anomalies anomalies={anomalies} onUpdateStatus={updateAnomalyStatus} />;
+      case 'timeline':
+        return <Timeline events={timeline} />;
+      case 'reports':
+        return <Reports />;
+      case 'settings':
+        return <Settings />;
+      default:
+        return <Dashboard logs={logs} metrics={metrics} anomalies={anomalies} />;
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background grid-cyber">
+      <div className="flex">
+        <Sidebar
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          anomalyCount={activeAnomalyCount}
+        />
+        
+        <div className="flex-1 flex flex-col min-h-screen">
+          <Header 
+            onSearch={handleSearch}
+            isLive={isLive}
+            onToggleLive={toggleLive}
+          />
+          
+          <main className="flex-1 p-4 lg:p-6 overflow-auto scrollbar-cyber">
+            {renderPage()}
+          </main>
+        </div>
       </div>
     </div>
   );
