@@ -4,6 +4,7 @@ import { PageType } from '@/types/cyber';
 import {
   LayoutDashboard,
   FileText,
+  Upload,
   AlertTriangle,
   Clock,
   FileBarChart,
@@ -23,6 +24,7 @@ interface SidebarProps {
 const navItems: { id: PageType; label: string; icon: React.ElementType }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'logs', label: 'Log Explorer', icon: FileText },
+  { id: 'upload', label: 'Upload Data', icon: Upload },
   { id: 'anomalies', label: 'Anomalies', icon: AlertTriangle },
   { id: 'timeline', label: 'Timeline', icon: Clock },
   { id: 'reports', label: 'Reports', icon: FileBarChart },

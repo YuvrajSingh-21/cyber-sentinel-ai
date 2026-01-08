@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { Dashboard } from './Dashboard';
 import { Logs } from './Logs';
+import { UploadData } from './UploadData';
 import { Anomalies } from './Anomalies';
 import { Timeline } from './Timeline';
 import { Reports } from './Reports';
@@ -41,6 +42,8 @@ const Index = () => {
         return <Dashboard logs={logs} metrics={metrics} anomalies={anomalies} />;
       case 'logs':
         return <Logs logs={logs} onClearLogs={clearLogs} />;
+      case 'upload':
+        return <UploadData />;
       case 'anomalies':
         return <Anomalies anomalies={anomalies} onUpdateStatus={updateAnomalyStatus} />;
       case 'timeline':
