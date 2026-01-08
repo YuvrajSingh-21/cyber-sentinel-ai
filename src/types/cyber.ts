@@ -51,4 +51,4 @@ export interface Report {
   status: 'pending' | 'completed' | 'failed';
 }
 
-export type PageType = 'dashboard' | 'logs' | 'anomalies' | 'timeline' | 'reports' | 'settings';
+export type PageType = 'dashboard' | 'logs' | 'upload' | 'anomalies' | 'timeline' | 'reports' | 'settings';
