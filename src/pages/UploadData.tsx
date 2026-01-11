@@ -309,47 +309,55 @@ export const UploadData = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {/* View Uploaded Logs Dropdown */}
-          {uploadedFiles.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium 
-                                 bg-accent hover:bg-accent/80 border border-border rounded-lg transition-colors">
-                  <Eye className="w-4 h-4" />
-                  <span>View Uploaded Logs</span>
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 bg-card border-border z-50">
-                <DropdownMenuItem 
-                  onClick={() => setSelectedFile(null)}
-                  className={cn(
-                    "cursor-pointer",
-                    !selectedFile && "bg-accent"
-                  )}
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  <span>All Files ({uploadedLogs.length} logs)</span>
-                </DropdownMenuItem>
-                {uploadedFiles.map((file, index) => (
+          {/* View Uploaded Logs Dropdown - Always visible */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium 
+                               bg-accent hover:bg-accent/80 border border-border rounded-lg transition-colors">
+                <Eye className="w-4 h-4" />
+                <span>View Uploaded Logs</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64 bg-card border-border z-50">
+              {uploadedFiles.length > 0 ? (
+                <>
                   <DropdownMenuItem 
-                    key={index}
-                    onClick={() => setSelectedFile(file.name)}
+                    onClick={() => setSelectedFile(null)}
                     className={cn(
                       "cursor-pointer",
-                      selectedFile === file.name && "bg-accent"
+                      !selectedFile && "bg-accent"
                     )}
                   >
-                    <FileJson className="w-4 h-4 mr-2" />
-                    <div className="flex flex-col">
-                      <span className="truncate max-w-[180px]">{file.name}</span>
-                      <span className="text-xs text-muted-foreground">{file.logCount} logs</span>
-                    </div>
+                    <FileText className="w-4 h-4 mr-2" />
+                    <span>All Files ({uploadedLogs.length} logs)</span>
                   </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+                  {uploadedFiles.map((file, index) => (
+                    <DropdownMenuItem 
+                      key={index}
+                      onClick={() => setSelectedFile(file.name)}
+                      className={cn(
+                        "cursor-pointer",
+                        selectedFile === file.name && "bg-accent"
+                      )}
+                    >
+                      <FileJson className="w-4 h-4 mr-2" />
+                      <div className="flex flex-col">
+                        <span className="truncate max-w-[180px]">{file.name}</span>
+                        <span className="text-xs text-muted-foreground">{file.logCount} logs</span>
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </>
+              ) : (
+                <div className="px-3 py-4 text-center text-muted-foreground">
+                  <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No files uploaded yet</p>
+                  <p className="text-xs mt-1">Upload logs to view them here</p>
+                </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
           
           {uploadedLogs.length > 0 && (
             <button
