@@ -38,9 +38,92 @@ const typeColors = {
   suspicious_activity: 'bg-accent/10 text-accent border-accent/30',
 };
 
+// Remediation steps based on anomaly type
+const remediationSteps: Record<string, { steps: string[]; precautions: string[] }> = {
+  cpu_spike: {
+    steps: [
+      "Identify the process causing high CPU usage using task manager or 'top' command",
+      "Check for malware or cryptominers running in background",
+      "Review recently installed software or updates",
+      "Terminate suspicious processes and quarantine related files",
+      "Run a full system antivirus scan"
+    ],
+    precautions: [
+      "Set up CPU usage alerts at 70% threshold",
+      "Implement application whitelisting",
+      "Regular system performance monitoring",
+      "Keep all software and OS updated"
+    ]
+  },
+  network_anomaly: {
+    steps: [
+      "Capture network traffic using Wireshark or tcpdump",
+      "Identify the source and destination of unusual traffic",
+      "Block suspicious IPs at firewall level",
+      "Check for data exfiltration attempts",
+      "Review DNS queries for C2 communication patterns"
+    ],
+    precautions: [
+      "Implement network segmentation",
+      "Deploy intrusion detection systems (IDS)",
+      "Enable deep packet inspection",
+      "Maintain updated firewall rules",
+      "Regular network traffic baseline analysis"
+    ]
+  },
+  file_change: {
+    steps: [
+      "Compare file hash with known good version",
+      "Check file modification timestamps and user context",
+      "Restore file from backup if compromised",
+      "Scan modified files for malware signatures",
+      "Review file access logs for unauthorized changes"
+    ],
+    precautions: [
+      "Implement file integrity monitoring (FIM)",
+      "Use version control for critical files",
+      "Restrict write permissions to essential users",
+      "Enable audit logging for sensitive directories"
+    ]
+  },
+  auth_failure: {
+    steps: [
+      "Lock the affected user account temporarily",
+      "Review login attempt patterns and source IPs",
+      "Check for credential stuffing or brute force attacks",
+      "Reset passwords for compromised accounts",
+      "Enable additional authentication factors"
+    ],
+    precautions: [
+      "Implement account lockout policies",
+      "Deploy multi-factor authentication (MFA)",
+      "Use CAPTCHA after failed attempts",
+      "Monitor for leaked credentials on dark web",
+      "Implement geo-based login restrictions"
+    ]
+  },
+  suspicious_activity: {
+    steps: [
+      "Isolate the affected system from network",
+      "Collect forensic evidence (memory dump, logs)",
+      "Analyze timeline of events leading to the alert",
+      "Check for lateral movement indicators",
+      "Engage incident response team if necessary"
+    ],
+    precautions: [
+      "Implement behavior-based detection",
+      "Regular security awareness training",
+      "Deploy endpoint detection and response (EDR)",
+      "Maintain incident response playbooks",
+      "Conduct regular penetration testing"
+    ]
+  }
+};
+
 export const Anomalies = ({ anomalies, onUpdateStatus }: AnomaliesProps) => {
   const [selectedAnomaly, setSelectedAnomaly] = useState<Anomaly | null>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'investigating' | 'resolved'>('all');
+  const [showRemediation, setShowRemediation] = useState(false);
 
   const filteredAnomalies = filter === 'all' 
     ? anomalies 
@@ -56,6 +139,10 @@ export const Anomalies = ({ anomalies, onUpdateStatus }: AnomaliesProps) => {
     if (score >= 80) return 'bg-destructive';
     if (score >= 60) return 'bg-warning';
     return 'bg-primary';
+  };
+
+  const getRemediation = (type: string) => {
+    return remediationSteps[type] || remediationSteps['suspicious_activity'];
   };
 
   return (
@@ -206,7 +293,10 @@ export const Anomalies = ({ anomalies, onUpdateStatus }: AnomaliesProps) => {
                 <h2 className="text-xl font-bold">XAI Analysis</h2>
               </div>
               <button 
-                onClick={() => setSelectedAnomaly(null)}
+                onClick={() => {
+                  setSelectedAnomaly(null);
+                  setShowRemediation(false);
+                }}
                 className="p-2 hover:bg-muted rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -250,44 +340,86 @@ export const Anomalies = ({ anomalies, onUpdateStatus }: AnomaliesProps) => {
                 </p>
               </div>
 
-              {/* Related Logs */}
-              <div>
-                <h4 className="font-semibold mb-3">Related Log Entries</h4>
-                <div className="space-y-2">
-                  {selectedAnomaly.relatedLogs.map((logId) => (
-                    <div key={logId} className="p-3 bg-muted/30 rounded-lg font-mono text-xs">
-                      {logId}
-                    </div>
-                  ))}
+              {/* Remediation Steps - shown after clicking Investigate */}
+              {showRemediation && (
+                <div className="space-y-4 animate-fade-in">
+                  <div className="glass-card p-4 border-l-4 border-primary">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary" />
+                      Steps to Remediate
+                    </h4>
+                    <ol className="space-y-2 text-sm text-muted-foreground">
+                      {getRemediation(selectedAnomaly.type).steps.map((step, index) => (
+                        <li key={index} className="flex gap-3">
+                          <span className="shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary text-xs flex items-center justify-center font-bold">
+                            {index + 1}
+                          </span>
+                          <span className="leading-relaxed">{step}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+
+                  <div className="glass-card p-4 border-l-4 border-warning">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <AlertTriangle className="w-5 h-5 text-warning" />
+                      Precautions to Prevent Recurrence
+                    </h4>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      {getRemediation(selectedAnomaly.type).precautions.map((precaution, index) => (
+                        <li key={index} className="flex gap-3">
+                          <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-warning mt-2" />
+                          <span className="leading-relaxed">{precaution}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Actions */}
               <div className="flex gap-3 pt-4 border-t border-border/50">
-                <button
-                  onClick={() => {
-                    onUpdateStatus(selectedAnomaly.id, 'investigating');
-                    setSelectedAnomaly(null);
-                  }}
-                  className="cyber-button-secondary flex-1"
-                >
-                  <Eye className="w-4 h-4" />
-                  Investigate
-                </button>
-                <button
-                  onClick={() => {
-                    onUpdateStatus(selectedAnomaly.id, 'resolved');
-                    setSelectedAnomaly(null);
-                  }}
-                  className="cyber-button-primary flex-1"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Resolve
-                </button>
+                {!showRemediation ? (
+                  <button
+                    onClick={() => {
+                      setShowRemediation(true);
+                      onUpdateStatus(selectedAnomaly.id, 'investigating');
+                    }}
+                    className="cyber-button-secondary flex-1"
+                  >
+                    <Eye className="w-4 h-4" />
+                    Investigate
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      onUpdateStatus(selectedAnomaly.id, 'resolved');
+                      setSelectedAnomaly(null);
+                      setShowRemediation(false);
+                    }}
+                    className="cyber-button-primary flex-1"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Mark as Resolved
+                  </button>
+                )}
+                {!showRemediation && (
+                  <button
+                    onClick={() => {
+                      onUpdateStatus(selectedAnomaly.id, 'resolved');
+                      setSelectedAnomaly(null);
+                    }}
+                    className="cyber-button-primary flex-1"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Resolve
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     onUpdateStatus(selectedAnomaly.id, 'dismissed');
                     setSelectedAnomaly(null);
+                    setShowRemediation(false);
                   }}
                   className="cyber-button-ghost"
                 >
